@@ -1,0 +1,19 @@
+[project]
+name = "meal-planner"
+version = "0.1.0"
+description = "Easily Plan Meals for the week"
+authors = [
+    {name = "Jonathan Elsner", email = "jeelsner@outlook.com"},
+]
+dependencies = []
+requires-python = ">=3.13"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[tool.pdm]
+distribution = true
