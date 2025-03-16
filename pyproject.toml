@@ -5,7 +5,7 @@ description = "Easily Plan Meals for the week"
 authors = [
     {name = "Jonathan Elsner", email = "jeelsner@outlook.com"},
 ]
-dependencies = []
+dependencies = ["pyyaml>=6.0.2"]
 requires-python = ">=3.13"
 readme = "README.md"
 license = {text = "MIT"}
@@ -17,3 +17,8 @@ build-backend = "pdm.backend"
 
 [tool.pdm]
 distribution = true
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+]

@@ -56,7 +56,7 @@ class MealPlanShell(cmd.Cmd):
             begin_idx = days.index(begin)
             end_idx = (days.index(end))
 
-            self.plan = MealPlan(days[begin_idx:] + days[:end_idx+1])
+            self.plan = MealPlan.create_empty_plan(days[begin_idx:] + days[:end_idx+1])
             print(self.plan)
         else:
             print('Unknown plan format')

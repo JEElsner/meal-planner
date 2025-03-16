@@ -1,19 +1,28 @@
+from __future__ import annotations
 from typing import Iterable, Dict, Set, Any
 
 from .recipe import Recipe
 
-class Plan:
-    def __init__(self, days:Iterable[Any]=None, meals: Iterable[Any]=None):
+import yaml
+
+class Plan(yaml.YAMLObject):
+    yaml_tag = u'!MealPlan'
+
+    def __init__(self, days:Iterable[Any]=None, meals: Iterable[Any]=None, schedule: Dict[Any, Dict[Any, Recipe]]=None):
+        self.days = days
+        self.meals = meals
+        self.schedule = schedule
+    
+    @classmethod
+    def create_empty_plan(cls, days:Iterable[Any]=None, meals: Iterable[Any]=None) -> Plan:
         if days is None:
             days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Monday']
             
         if meals is None:
             meals = ['Breakfast', 'Lunch', 'Dinner']
+            
+        return Plan(days, meals, {day: {meal: None for meal in meals} for day in days}) 
         
-        self.days: Dict[Any, Dict[Any, Recipe]] = days
-        self.meals = meals
-
-        self.schedule = {day: {meal: None for meal in meals} for day in days}
 
     @property
     def recipes(self) -> Set[Recipe]:
@@ -66,3 +75,12 @@ class Plan:
             s += "\n" + hbar
 
         return s
+    
+    def __repr__(self) -> str:
+        return f"{self!s}(days={self.days!r}, meals={self.meals!r}, schedule={self.schedule!r})"
+
+    def __eq__(self, value):
+        if not isinstance(value, self.__class__):
+            return False
+        
+        return self.days == value.days and self.meals == value.meals and self.schedule == value.schedule
