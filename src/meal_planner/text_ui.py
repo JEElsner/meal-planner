@@ -100,6 +100,10 @@ class MealPlanShell(cmd.Cmd):
         """Quit the meal planner."""
         return True
     
+    def do_exit(self, args):
+        """Quit the meal planner."""
+        return True
+    
     def do_test(self, arg):
         print(arg)
     
