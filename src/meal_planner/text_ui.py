@@ -91,12 +91,14 @@ class MealPlanShell(cmd.Cmd):
 
     def do_set(self, args):
         """Set the meal a given day and time."""
-        day, meal, recipe = parse(args)
+        day, meal, recipe_str = parse(args)
+        
+        recipe = self.recipes.get(recipe_str, None)
         
         if recipe is None:
-            self.plan.set_meal(day, meal, None)
-        else:
-            self.plan.set_meal(day, meal, self.recipes[recipe])
+            print(f"Unknown recipe{recipe_str}. Create? (y/N)")
+        
+        self.plan.set_meal(day, meal, recipe)
         print(self.plan)
     
     def do_check(self, args):
