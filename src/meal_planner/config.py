@@ -1,20 +1,26 @@
-import yaml
+from __future__ import annotations
 
-from dataclasses import dataclass
+import yaml
 
 from typing import Literal
 
 from pathlib import Path
 
-@dataclass
 class Config(yaml.YAMLObject):
     yaml_tag = u'!Config'
 
-    plan_directory = Path('./data')
-    recipes_directory = Path('./data/recipes')
-    default_days = ['Tuesday1', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Monday', 'Tuesday2']
+    def __init__(self, plan_directory=Path('./data'),
+                  recipe_directory=Path('./data/recipes'),
+                  default_days=None):
+        self.plan_directory = plan_directory
+        self.recipes_directory = recipe_directory
+        
+        if default_days is None:
+            self.default_days = ['Tuesday1', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Monday', 'Tuesday2']
+        else:
+            self.default_days = default_days
 
-    def load_config(create: Literal[False, 'cwd', 'user']='cwd'):
+    def load_config(create: Literal[False, 'cwd', 'user']='cwd') -> Config:
         """Attempt to locate and load the planner configuration."""
 
         config_name = 'meal-planner-config.yml'
@@ -37,3 +43,9 @@ class Config(yaml.YAMLObject):
                 yaml.dump(config, f)
 
         return config
+    
+    def __str__(self) -> str:
+        return self.__repr__()
+    
+    def __repr__(self) -> str:
+        return f"Config(plan_directory={self.plan_directory!r}, recipes_directory={self.recipes_directory!r}, default_days={self.default_days!r})"

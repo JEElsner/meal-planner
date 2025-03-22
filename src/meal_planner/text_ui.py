@@ -2,6 +2,7 @@ import cmd
 
 from .meal_plan import Recipe
 from .meal_plan import Plan as MealPlan
+from .config import Config
 
 from typing import List
 
@@ -35,10 +36,19 @@ def parse(s: str) -> List[str]:
     return tokens
 
 class MealPlanShell(cmd.Cmd):
-    plan = None
     recipes = dict()
 
     prompt = "(meal planner) "
+    
+    def __init__(self, config: Config, plan: MealPlan=None, completekey = "tab", stdin = None, stdout = None):
+        super().__init__(completekey, stdin, stdout)
+        
+        self.config = config
+        
+        if plan is None:
+            self.plan = MealPlan.create_empty_plan(config.default_days)
+        else:
+            self.plan = plan
 
     def do_newplan(self, args):
         """Create a new meal plan
@@ -48,18 +58,28 @@ class MealPlanShell(cmd.Cmd):
             begin: The first day of the meal plan.
             end: The last day of the meal plan.
         """
-        type_, begin, end = parse(args)
+        args = parse(args)
+        type_ = args[0]
 
         days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        
+        success = False
 
         if type_.lower() == 'week':
+            _, begin, end = args
             begin_idx = days.index(begin)
             end_idx = (days.index(end))
 
             self.plan = MealPlan.create_empty_plan(days[begin_idx:] + days[:end_idx+1])
-            print(self.plan)
+            success = True
+        elif type_.lower() == 'default':
+            self.plan = MealPlan.create_empty_plan(self.config.default_days)
+            success = True
         else:
             print('Unknown plan format')
+
+        if success:
+            print(self.plan)
 
     def do_newrecipe(self, args):
         """Add a new recipe."""
