@@ -96,7 +96,11 @@ class MealPlanShell(cmd.Cmd):
         recipe = self.recipes.get(recipe_str, None)
         
         if recipe is None:
-            print(f"Unknown recipe{recipe_str}. Create? (y/N)")
+            resp = input(f"Unknown recipe {recipe_str}. Create? (y/N) ")
+            if resp.lower().startswith('y'):
+                # TODO make number of servings alterable
+                self.recipes[recipe_str] = Recipe(recipe_str, 4)
+                recipe = self.recipes[recipe_str]
         
         self.plan.set_meal(day, meal, recipe)
         print(self.plan)
