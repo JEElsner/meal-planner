@@ -1,10 +1,12 @@
 import cmd
 
+import yaml
+
 from .meal_plan import Recipe
 from .meal_plan import Plan as MealPlan
 from .config import Config
 
-from typing import List
+from typing import List, Dict
 
 def parse(s: str) -> List[str]:
     quote = None
@@ -36,8 +38,6 @@ def parse(s: str) -> List[str]:
     return tokens
 
 class MealPlanShell(cmd.Cmd):
-    recipes = dict()
-
     prompt = "(meal planner) "
     
     def __init__(self, config: Config, plan: MealPlan=None, completekey = "tab", stdin = None, stdout = None):
@@ -49,6 +49,9 @@ class MealPlanShell(cmd.Cmd):
             self.plan = MealPlan.create_empty_plan(config.default_days)
         else:
             self.plan = plan
+            
+        self.recipes: Dict[str, Recipe] = dict()
+        self.load_recipes()
 
     def do_newplan(self, args):
         """Create a new meal plan
@@ -124,12 +127,30 @@ class MealPlanShell(cmd.Cmd):
         
     def do_quit(self, args):
         """Quit the meal planner."""
+        self.save_recipes()
         return True
     
     def do_exit(self, args):
         """Quit the meal planner."""
-        return True
+        return self.do_quit(args)
     
     def do_test(self, arg):
         print(arg)
+        
+    def save_recipes(self):
+        # Eventually we'll probably want to move this out of the shell, but this is where recipes are stored right now, so this is where the method is.
+        
+        self.config.recipes_directory.mkdir(parents=True, exist_ok=True)
+
+        for name, recipe in self.recipes.items():
+            filename = name.lower().replace(' ', '-') + '.yml'
+
+            with open(self.config.recipes_directory / filename, mode='w') as f:
+                yaml.dump(recipe, f)
+                
+    def load_recipes(self):
+        for path in self.config.recipes_directory.glob('*.yml'):
+            with path.open() as file:
+                recipe = yaml.load(file, yaml.Loader)
+                self.recipes[recipe.name] = recipe
     

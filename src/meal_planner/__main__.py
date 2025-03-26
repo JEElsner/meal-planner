@@ -2,8 +2,9 @@ from .config import Config
 from .text_ui import MealPlanShell
 
 config = Config.load_config()
+shell = MealPlanShell(config)
 
 try:
-    MealPlanShell(config).cmdloop()
+    shell.cmdloop()
 except KeyboardInterrupt:
-    pass
+    shell.save_recipes()
