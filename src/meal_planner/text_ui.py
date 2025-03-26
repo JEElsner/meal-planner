@@ -186,16 +186,14 @@ class MealPlanShell(cmd.Cmd):
         with location.open() as f:
             self.plan = yaml.load(f, yaml.Loader)
         
-    @argparse
-    def do_quit(self):
+    def do_quit(self, args):
         """Quit the meal planner."""
         self.save_recipes()
         return True
     
-    @argparse
-    def do_exit(self):
+    def do_exit(self, args):
         """Quit the meal planner."""
-        return self.do_quit()
+        return self.do_quit(args)
     
     @argparse
     def do_test(self, arg):
