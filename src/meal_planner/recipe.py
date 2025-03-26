@@ -25,3 +25,6 @@ class Recipe(yaml.YAMLObject):
             return False
         
         return self.name == value.name and self.servings == value.servings and self.ingredients == value.ingredients and self.description == value.description
+    
+    def __hash__(self):
+        return hash((self.name, self.servings, tuple(self.ingredients), self.description))

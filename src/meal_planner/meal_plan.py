@@ -37,16 +37,16 @@ class Plan(yaml.YAMLObject):
         self.schedule[day][meal] = recipe
         
     def meals_remaining(self) -> Dict[Recipe, int]:
-        recipes = dict()
+        serving_counts = dict()
 
         for day in self.schedule.values():
             for meal in day.values():
                 if meal is None:
                     continue
                 
-                recipes[meal] = recipes.get(meal, meal.servings) - 1
+                serving_counts[meal] = serving_counts.get(meal, meal.servings) - 1
                 
-        return recipes
+        return serving_counts
 
     def validate(self):
         return all(map(lambda x: x >= 0, self.meals_remaining().values()))
