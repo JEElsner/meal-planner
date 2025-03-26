@@ -3,4 +3,7 @@ from .text_ui import MealPlanShell
 
 config = Config.load_config()
 
-MealPlanShell(config).cmdloop()
+try:
+    MealPlanShell(config).cmdloop()
+except KeyboardInterrupt:
+    pass
