@@ -4,6 +4,10 @@ import yaml
 
 from functools import wraps
 
+from pathlib import Path
+
+from datetime import date
+
 from .meal_plan import Recipe
 from .meal_plan import Plan as MealPlan
 from .config import Config
@@ -161,6 +165,26 @@ class MealPlanShell(cmd.Cmd):
     def do_print(self):
         """Print the current meal plan."""
         print(self.plan)
+
+    @argparse
+    def do_save(self, location: Path=None):
+        if location is None:
+            location = self.config.plan_directory / (date.today().isoformat() + '.yml')
+        elif not location.parent.exists():
+            print(f'Parent directory of save location does not exist: {location.parent}')
+            return
+        
+        with location.open(mode='w') as f:
+            yaml.dump(self.plan, f)
+            
+    @argparse
+    def do_load(self, location: Path):
+        if not location.exists():
+            print(f"File does not exist: {location}")
+            return
+        
+        with location.open() as f:
+            self.plan = yaml.load(f, yaml.Loader)
         
     @argparse
     def do_quit(self):
