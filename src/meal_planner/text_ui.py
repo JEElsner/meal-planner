@@ -2,11 +2,13 @@ import cmd
 
 import yaml
 
+from functools import wraps
+
 from .meal_plan import Recipe
 from .meal_plan import Plan as MealPlan
 from .config import Config
 
-from typing import List, Dict
+from typing import List, Dict, Callable
 
 def parse(s: str) -> List[str]:
     quote = None
@@ -36,6 +38,40 @@ def parse(s: str) -> List[str]:
         tokens.append(curr)
 
     return tokens
+
+def argparse(fn: Callable):
+    max_args = fn.__code__.co_argcount - 1
+    min_args = max_args - len(fn.__defaults__) if fn.__defaults__ else max_args
+
+    varnames = fn.__code__.co_varnames[1:fn.__code__.co_argcount]
+    
+    def ident(x):
+        return x
+    
+    positional_annotations = [fn.__annotations__.get(arg, ident) for arg in varnames]
+
+    @wraps(fn)
+    def wrapper(self, args):
+        args = parse(args)
+
+        if len(args) > max_args:
+            print(f'Too many arguments passed. Expected at most {max_args}.')
+            return
+        elif len(args) < min_args:
+            print(f'Not enough arguments passed. Expected at least {min_args}.')
+            print(f'The following arguments are missing: {", ".join(varnames[len(args):])}')
+            return
+        
+        for i, (arg, cast) in enumerate(zip(args, positional_annotations)):
+            try:
+                args[i] = cast(arg)
+            except ValueError:
+                print(f'Incorrect type for {varnames[i]} (argument #{i+1}); expected {positional_annotations[i].__name__}.')
+                return
+
+        return fn(self, *args)
+    
+    return wrapper
 
 class MealPlanShell(cmd.Cmd):
     prompt = "(meal planner) "
@@ -84,17 +120,16 @@ class MealPlanShell(cmd.Cmd):
         if success:
             print(self.plan)
 
-    def do_newrecipe(self, args):
+    @argparse
+    def do_newrecipe(self, name: str, servings: int, description: str=""):
         """Add a new recipe."""
-        name, servings = parse(args)
-        servings = int(servings)
-        
-        self.recipes[name] = Recipe(name, servings)
+
+        self.recipes[name] = Recipe(name, servings, description=description)
         print(f'Created recipe {name}')
 
-    def do_set(self, args):
+    @argparse
+    def do_set(self, day, meal, recipe_str):
         """Set the meal a given day and time."""
-        day, meal, recipe_str = parse(args)
         
         recipe = self.recipes.get(recipe_str, None)
         
@@ -108,7 +143,8 @@ class MealPlanShell(cmd.Cmd):
         self.plan.set_meal(day, meal, recipe)
         print(self.plan)
     
-    def do_check(self, args):
+    @argparse
+    def do_check(self):
         print("Meals Remaining")
         print("-------------------")
 
@@ -121,19 +157,23 @@ class MealPlanShell(cmd.Cmd):
         else:
             print("You're gonna starve!")
 
-    def do_print(self, args):
+    @argparse
+    def do_print(self):
         """Print the current meal plan."""
         print(self.plan)
         
-    def do_quit(self, args):
+    @argparse
+    def do_quit(self):
         """Quit the meal planner."""
         self.save_recipes()
         return True
     
-    def do_exit(self, args):
+    @argparse
+    def do_exit(self):
         """Quit the meal planner."""
-        return self.do_quit(args)
+        return self.do_quit()
     
+    @argparse
     def do_test(self, arg):
         print(arg)
         
