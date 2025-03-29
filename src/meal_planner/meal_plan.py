@@ -34,6 +34,11 @@ class Plan(yaml.YAMLObject):
         return recipes
     
     def set_meal(self, day, meal, recipe: Recipe) -> None:
+        if day not in self.schedule.keys():
+            raise ValueError(f"Day '{day}' not in plan.")
+        elif meal not in self.schedule[day].keys():
+            raise ValueError(f"Meal time '{meal}' not in plan.")
+
         self.schedule[day][meal] = recipe
         
     def meals_remaining(self) -> Dict[Recipe, int]:

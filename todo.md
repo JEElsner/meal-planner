@@ -16,5 +16,3 @@ in no particular order, complete by priority and ease:
 - gracefully handle bad args to `newplan` so it doesn't crash
 
 Bugs:
-- if you try to set a meal to None, it first asks you if you want to create that recipe
-- gracefully handle lowercase and otherwise malformed args to `set`

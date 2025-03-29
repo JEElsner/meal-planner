@@ -136,16 +136,26 @@ class MealPlanShell(cmd.Cmd):
         """Set the meal a given day and time."""
         
         recipe = self.recipes.get(recipe_str, None)
-        
-        if recipe is None:
+
+        if recipe_str.lower() == 'none':
+            # Allow 'None' recipe to clear recipe for that meal
+            pass
+        elif recipe is None:
+            # TODO: take this path by catching a KeyError instead of checking for None?
             resp = input(f"Unknown recipe {recipe_str}. Create? (y/N) ")
             if resp.lower().startswith('y'):
                 # TODO make number of servings alterable
                 self.recipes[recipe_str] = Recipe(recipe_str, 4)
                 recipe = self.recipes[recipe_str]
+            else:
+                print('No recipe to add')
+                return
         
-        self.plan.set_meal(day, meal, recipe)
-        print(self.plan)
+        try:
+            self.plan.set_meal(day, meal, recipe)
+            print(self.plan)
+        except ValueError as err:
+            print(err.args[0])
     
     @argparse
     def do_check(self):
