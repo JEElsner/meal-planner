@@ -12,7 +12,5 @@ in no particular order, complete by priority and ease:
 - gui
 - autocomplete
 - subrecipes
-- actually fix the table formatting so text doesn't spill out
-- gracefully handle bad args to `newplan` so it doesn't crash
 
 Bugs:

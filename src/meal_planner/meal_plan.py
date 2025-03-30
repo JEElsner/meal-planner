@@ -29,7 +29,7 @@ class Plan(yaml.YAMLObject):
         recipes = set()
 
         for day_meals in self.schedule.values():
-            recipes.update(day_meals)
+            recipes.update(day_meals.values())
 
         return recipes
     
@@ -57,13 +57,13 @@ class Plan(yaml.YAMLObject):
         return all(map(lambda x: x >= 0, self.meals_remaining().values()))
     
     def __str__(self) -> str:
-        # longest_day = max(map(len, map(str, self.days))) + 1
-        # longest_recipe = max(map(len, map(str, self.recipes)))
-        # longest_meal_name = max(map(len, map(str, self.meals)))
-        # longest_col_name = max(longest_recipe, longest_meal_name) + 1
+        longest_day = max(map(len, map(str, self.days))) + 1
+        longest_recipe = max(map(len, map(str, self.recipes)))
+        longest_meal_name = max(map(len, map(str, self.meals)))
+        longest_col_name = max(longest_recipe, longest_meal_name) + 1
         
-        longest_day = 10
-        longest_col_name = 10
+        # longest_day = 10
+        # longest_col_name = 20
 
         hbar = "+" + "-"*longest_day + "+" + ("-" * longest_col_name + "+") * len(self.meals) + "\n"
 
@@ -71,12 +71,12 @@ class Plan(yaml.YAMLObject):
         s += hbar
         s += "|" + (' ' * longest_day) + "|"
         for meal_name in self.meals:
-            s += f"{meal_name:<10}|"
+            s += f"{meal_name.ljust(longest_col_name)}|"
         s += "\n" + hbar
         for day in self.days:
-            s += f"|{day:<10}|"
+            s += f"|{day.ljust(longest_day)}|"
             for meal in self.meals:
-                s += f"{self.schedule[day][meal] or '':<10}|"
+                s += f"{str(self.schedule[day][meal] or '').ljust(longest_col_name)}|"
             s += "\n" + hbar
 
         return s
